@@ -1,0 +1,17 @@
+{
+    "window_spec": {
+        "x": 500,
+        "y": 500,
+        "w": 200,
+        "h": 200
+    },
+    "shortcut": {
+        "toggle_hide": "Ctrl+Alt+H",
+        "toggle_drag": "Ctrl+Alt+D"
+    },
+    "qt": {
+        "qlabel_stylesheet": "QLabel { color: green; }"
+    },
+    "update_interval_s": 1,
+    "idle_after_s": 60
+}
