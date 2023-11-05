@@ -50,21 +50,29 @@ class WindowOverlay(QWidget):
         self.l_cpu = QLabel(self)
         self.l_cpu.setAlignment(Qt.AlignLeft)
         self.l_cpu.setStyleSheet(config['qt']['qlabel_stylesheet'])
+        self.l_cpu.setMaximumWidth(self.width())
+        self.l_cpu.setWordWrap(True)
         self.layout.addWidget(self.l_cpu)
 
         self.l_mem = QLabel(self)
         self.l_mem.setAlignment(Qt.AlignLeft)
         self.l_mem.setStyleSheet(config['qt']['qlabel_stylesheet'])
+        self.l_mem.setMaximumWidth(self.width())
+        self.l_mem.setWordWrap(True)
         self.layout.addWidget(self.l_mem)
 
         self.l_disk = QLabel(self)
         self.l_disk.setAlignment(Qt.AlignLeft)
         self.l_disk.setStyleSheet(config['qt']['qlabel_stylesheet'])
+        self.l_disk.setMaximumWidth(self.width())
+        self.l_disk.setWordWrap(True)
         self.layout.addWidget(self.l_disk)
 
         self.l_status = QLabel('Initializing...', self)
         self.l_status.setAlignment(Qt.AlignLeft)
         self.l_status.setStyleSheet(config['qt']['qlabel_stylesheet'])
+        self.l_status.setMaximumWidth(self.width())
+        self.l_status.setWordWrap(True)
         self.layout.addWidget(self.l_status)
 
         self.setLayout(self.layout)
@@ -88,6 +96,8 @@ class WindowOverlay(QWidget):
         self.draggable = False
         self.drag_pos = None
 
+        self.is_idle = False
+
         self.l_status.setText('')
     
     def update_stats(self):
@@ -103,14 +113,14 @@ class WindowOverlay(QWidget):
         )
         self.l_cpu.adjustSize()
 
-        mem_used = mem_usage.used/8/1024/1024
-        mem_total = mem_usage.total/8/1024/1024
+        mem_used = mem_usage.used/1024/1024
+        mem_total = mem_usage.total/1024/1024
         self.l_mem.setText(f'Memory: {mem_used:.2f}/{mem_total:.2f} MB')
         self.l_mem.adjustSize()
 
         if self.prev_disk_io is not None:
-            disk_read = (disk_io.read_bytes - self.prev_disk_io.read_bytes)/8/1024/1024
-            disk_write = (disk_io.write_bytes - self.prev_disk_io.write_bytes)/8/1024/1024
+            disk_read = (disk_io.read_bytes - self.prev_disk_io.read_bytes)/1024/1024
+            disk_write = (disk_io.write_bytes - self.prev_disk_io.write_bytes)/1024/1024
             disk_read /= config['update_interval_s']
             disk_write /= config['update_interval_s']
             self.l_disk.setText(f'Disk: {disk_read:.2f}/{disk_write:.2f} MB/s')
@@ -122,10 +132,14 @@ class WindowOverlay(QWidget):
     def check_idle(self):
         idle_duration = get_idle_duration()
         if idle_duration > config['idle_after_s']:
+            self.is_idle = True
             self.timer_update_stats.stop()
             self.l_status.setText('IDLED: Suspended')
         else:
-            self.timer_update_stats.start()
+            if self.is_idle:
+                self.is_idle = False
+                self.timer_update_stats.start()
+                self.l_status.setText('')
     
     def toggle_drag(self):
         self.draggable = not self.draggable
@@ -178,8 +192,6 @@ def main():
     except FileNotFoundError:
         with open('config_default.json', 'r') as f:
             config = json.load(f)
-        with open('config.json', 'w') as f:
-            json.dump(config, f, indent=4)
 
     app = QApplication(sys.argv)
     widget = WindowOverlay()

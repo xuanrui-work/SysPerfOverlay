@@ -3,7 +3,7 @@
         "x": 500,
         "y": 500,
         "w": 200,
-        "h": 200
+        "h": 150
     },
     "shortcut": {
         "toggle_hide": "Ctrl+Alt+H",
