@@ -192,6 +192,8 @@ def main():
     except FileNotFoundError:
         with open('config_default.json', 'r') as f:
             config = json.load(f)
+        with open('config.json', 'w') as f:
+            json.dump(config, f, indent=4)
 
     app = QApplication(sys.argv)
     widget = WindowOverlay()
